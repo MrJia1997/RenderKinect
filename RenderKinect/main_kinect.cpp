@@ -101,8 +101,8 @@ int main(int argc, char **argv) {
 
     // Test Transform
     Eigen::Affine3d transform(Eigen::Affine3d::Identity());
-    transform.translate(Eigen::Vector3d(0.089837, -0.137769, 0.949210));
-    transform.rotate(Eigen::Quaterniond(0.906614,-0.282680,-0.074009,-0.304411));
+    transform.translate(Eigen::Vector3d(0, 0, 2.0));
+    //transform.rotate(Eigen::Quaterniond(0.906614,-0.282680,-0.074009,-0.304411));
 
     // Kinect Simulator
     render_kinect::Simulate Simulator(cam_info, full_path.str(), dot_path);
@@ -119,9 +119,10 @@ int main(int argc, char **argv) {
     for(int i=0; i<frames; ++i) {
         
         // sample noisy transformation around initial one
-        getRandomTransform(0.02,0.02,0.02,0.05,noise);
-        Eigen::Affine3d current_tf = noise*transform;
-        
+        //getRandomTransform(0.02,0.02,0.02,0.05,noise);
+        //Eigen::Affine3d current_tf = noise*transform;
+        Eigen::Affine3d current_tf = transform;
+
         // give pose and object name to renderer
         Simulator.simulateMeasurement(current_tf, store_depth, store_label, store_pcd);
         

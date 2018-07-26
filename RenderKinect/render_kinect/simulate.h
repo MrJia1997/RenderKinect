@@ -61,6 +61,14 @@ static unsigned countf = 0;
 namespace render_kinect {
 
     class Simulate {
+    
+    public:
+        KinectSimulator * object_model_;
+        cv::Mat depth_im_, scaled_im_, point_cloud_, labels_;
+        std::string out_path_;
+        Eigen::Affine3d transform_;
+
+    
     public:
     
         Simulate(CameraInfo &cam_info, std::string object_name, std::string dot_path) 
@@ -155,11 +163,6 @@ namespace render_kinect {
                 #endif
             }
         }
-
-        KinectSimulator *object_model_;
-        cv::Mat depth_im_, scaled_im_, point_cloud_, labels_;
-        std::string out_path_;
-        Eigen::Affine3d transform_; 
 
     };
 

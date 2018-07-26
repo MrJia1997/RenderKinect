@@ -208,26 +208,20 @@ namespace render_kinect {
                 // check if there is any intersection of the ray with an object by do_intersect
                 bool reach_mesh_l = search_->tree.do_intersect(Ray(Point(0,0,0), Vector(ray.x, ray.y, ray.z)));
                 if (reach_mesh_l) {
-                    // if there is one or many intersections, order them according to distance to camera 
-                    // and continue computation with closest
-                    
+                    // continue computation with closest
                     Ray_intersection intersection_l = search_->tree.first_intersection(
                         Ray(Point(0, 0, 0), Vector(ray.x, ray.y, ray.z)));
                     Point *point_l = boost::get<Point>(&(intersection_l->first));
                     std::size_t triangle_id = std::distance(search_->triangles.begin(), intersection_l->second);
                     
                     // check if point is also visible in second camera by casting a ray to this point
-                    bool reach_mesh_r = search_->tree.do_intersect(
-                        Ray(Point(camera_.getTx(), 0, 0), *point_l));
+                    bool reach_mesh_r = search_->tree.do_intersect(Ray(Point(camera_.getTx(), 0, 0), *point_l));
                     if (reach_mesh_r) {
-                        // if there are intersections, get the closest to the camera
                         // check if closest intersection is the same as from the left image
                         // if not, point is not visible in both images -> occlusion boundary
-
                         Ray_intersection intersection_r = search_->tree.first_intersection(
                             Ray(Point(camera_.getTx(), 0, 0), *point_l));
                         Point *point_r = boost::get<Point>(&(intersection_r->first));
-                        
                         Point diff(point_l->x() - point_r->x(),
                             point_l->y() - point_r->y(),
                             point_l->z() - point_r->z());
@@ -236,8 +230,8 @@ namespace render_kinect {
                             cv::Point3d point_right(point_l->x() - camera_.getTx(), point_l->y(), point_l->z());
                             cv::Point2f right_pixel = camera_.project3dToPixel(point_right);
                             // quantize right_pixel
-                            right_pixel.x = round(right_pixel.x*8.0) / 8.0;
-                            right_pixel.y = round(right_pixel.y*8.0) / 8.0;
+                            right_pixel.x = round(right_pixel.x * 8.0) / 8.0;
+                            right_pixel.y = round(right_pixel.y * 8.0) / 8.0;
                             // compute disparity image
                             float quant_disp = c - right_pixel.x;
                             float* disp_i = disp.ptr<float>(r);
@@ -245,7 +239,7 @@ namespace render_kinect {
                             // fill label image with part id 
                             unsigned char* labels_i = labels.ptr<unsigned char>(r);
                             cv::Scalar color = color_map_[search_->part_ids[triangle_id]];
-                            for (int col = 0; col<3; ++col) {
+                            for (int col = 0; col < 3; ++col) {
                                 labels_i[(int)c * 3 + col] = color(col);
                             }
                         }
@@ -429,7 +423,7 @@ namespace render_kinect {
             
             // window shifting over disparity image
             for (unsigned c=0; c<lim_cols; ++c) {
-                if (dots_i[c + center]>0 && disp_i[c + center] < invalid_disp_) {
+                if (dots_i[c + center] > 0 && disp_i[c + center] < invalid_disp_) {
                     cv::Rect roi = cv::Rect(c, r, size_filt_, size_filt_);
                     cv::Mat window = disp(roi);
                     cv::Mat dot_win = dot_pattern_(roi);
@@ -490,7 +484,7 @@ namespace render_kinect {
 
                         }
                     } 
-                }
+                } 
             } // lim_cols
         } // lim_rows
     }

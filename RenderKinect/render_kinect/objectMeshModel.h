@@ -128,13 +128,37 @@ namespace render_kinect {
                     << " vertices" << std::endl;
             
             vertices_.resize(4,numVertices_);
+            Eigen::VectorXd test(numVertices_);
             for (unsigned v=0; v<numVertices_; ++v) {
                 vertices_(0,v) = scene_->mMeshes[0]->mVertices[v].x;
                 vertices_(1,v) = scene_->mMeshes[0]->mVertices[v].y;
                 vertices_(2,v) = scene_->mMeshes[0]->mVertices[v].z;
-                vertices_(3,v) = 1;
+                vertices_(3,v) = test(v) = 1;
             }
-        
+            
+            
+            Eigen::VectorXd maxima_, minima_, means_;
+            maxima_ = vertices_.rowwise().maxCoeff();
+            minima_ = vertices_.rowwise().minCoeff();
+            means_ = vertices_.rowwise().mean();
+            // DEBUG
+            std::cout << "Row maximum (x,y,z,1): " << std::endl
+                << maxima_ << std::endl;
+            std::cout << "Row minimum (x,y,z,1): " << std::endl
+                << minima_ << std::endl;
+            std::cout << "Row mean (x,y,z,1): " << std::endl
+                << means_ << std::endl;
+
+            // try to normalize the mesh model
+            // restricted in a 0.5 x 0.5 cube
+            vertices_.colwise() -= means_;
+            vertices_ /= 2 * (maxima_ - minima_).maxCoeff();
+            // restore 1 in row 3
+            vertices_.row(3) = test.transpose();
+            std::cout << "Row mean (x,y,z,1): " << std::endl
+                << vertices_.rowwise().mean() << std::endl;
+
+
             original_transform_ = Eigen::Affine3d::Identity();
         }
     

@@ -60,6 +60,7 @@ namespace render_kinect {
         double cx_, cy_;
         double tx_;
 
+
         NoiseType noise_;
     };
 
