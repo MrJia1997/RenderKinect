@@ -150,9 +150,9 @@ namespace render_kinect {
             //    << means_ << std::endl;
 
             // try to normalize the mesh model
-            // restricted in a 0.5 x 0.5 cube
+            // restricted in a 1 x 1 cube
             vertices_.colwise() -= means_;
-            vertices_ /= 2 * (maxima_ - minima_).maxCoeff();
+            vertices_ /= (maxima_ - minima_).maxCoeff();
             // restore 1 in row 3
             vertices_.row(3) = test.transpose();
 

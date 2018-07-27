@@ -103,7 +103,7 @@ int main(int argc, char **argv) {
     double phi = (1.0 + sqrt(5.0)) / 2.0;
     double phi_inv = 1.0 / phi;
     
-    /*Eigen::Vector3d normals[20];
+    Eigen::Vector3d normals[20];
     int cnt = 0;
     for (int k = 0; k < 5; ++k)
     {
@@ -134,15 +134,17 @@ int main(int argc, char **argv) {
             }
         }
         ++cnt;
-    }*/
+    }
 
-    Eigen::Vector3d normals[6];
+    Eigen::Vector3d bad_normal(0, 0, -1);
+
+    /*Eigen::Vector3d normals[6];
     normals[0] << -1, 0, 0;
     normals[1] << +1, 0, 0;
     normals[2] << 0, -1, 0;
     normals[3] << 0, +1, 0;
     normals[4] << 0, 0, -1;
-    normals[5] << 0, 0, +1;
+    normals[5] << 0, 0, +1;*/
 
     /*
     Eigen::Affine3d transform(Eigen::Affine3d::Identity());
@@ -163,7 +165,7 @@ int main(int argc, char **argv) {
     render_kinect::Simulate Simulator(cam_info, full_path.str(), dot_path);
 
     // Number of samples
-    int frames = 5;
+    int frames = 20;
     // Flags for what output data should be generated
     bool store_depth = 1;
     bool store_label = 1;
@@ -178,12 +180,13 @@ int main(int argc, char **argv) {
         //Eigen::Affine3d current_tf = noise*transform;
         Eigen::Affine3d transform(Eigen::Affine3d::Identity());
         Eigen::Vector3d axis;
-        axis = normals[i+1].cross(normals[0]).normalized();
-        double costheta = acos(normals[i+1].dot(normals[0]) / (normals[i+1].norm() * normals[0].norm()));
+        axis = normals[i].cross(bad_normal).normalized();
+        double costheta = acos(normals[i].dot(bad_normal) / (normals[i].norm() * bad_normal.norm()));
         std::cout << "axis = " << axis << std::endl;
         std::cout << "cos = " << costheta << std::endl;
-        transform.rotate(Eigen::AngleAxisd(costheta, axis));
         transform.translate(Eigen::Vector3d(0, 0, 2));
+        std::cout << transform.matrix() << std::endl;
+        transform.rotate(Eigen::AngleAxisd(costheta, axis));
         std::cout << transform.matrix() << std::endl;
         Eigen::Affine3d current_tf = transform;
 
