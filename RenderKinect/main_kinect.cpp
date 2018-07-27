@@ -100,15 +100,70 @@ int main(int argc, char **argv) {
     cam_info.noise_ = render_kinect::NONE;
 
     // Test Transform
+    double phi = (1.0 + sqrt(5.0)) / 2.0;
+    double phi_inv = 1.0 / phi;
+    
+    /*Eigen::Vector3d normals[20];
+    int cnt = 0;
+    for (int k = 0; k < 5; ++k)
+    {
+        for (int i = -1; i <= 1; i += 2)
+        {
+            for (int j = -1; j <= 1; j += 2)
+            {
+                if (k == 0)
+                {
+                    normals[cnt] << 0, i * phi, j * phi_inv;
+                }
+                else if (k == 1)
+                {
+                    normals[cnt] << i * phi_inv, 0, j * phi;
+                }
+                else if (k == 2)
+                {
+                    normals[cnt] << i * phi, j * phi_inv, 0;
+                }
+                else if (k == 3)
+                {
+                    normals[cnt] << -1, i, j;
+                }
+                else if (k == 4)
+                {
+                    normals[cnt] << 1, i, j;
+                }
+            }
+        }
+        ++cnt;
+    }*/
+
+    Eigen::Vector3d normals[6];
+    normals[0] << -1, 0, 0;
+    normals[1] << +1, 0, 0;
+    normals[2] << 0, -1, 0;
+    normals[3] << 0, +1, 0;
+    normals[4] << 0, 0, -1;
+    normals[5] << 0, 0, +1;
+
+    /*
     Eigen::Affine3d transform(Eigen::Affine3d::Identity());
-    transform.translate(Eigen::Vector3d(0, 0, 2.0));
+    Eigen::Vector3d axis;
+    axis = normals[1].cross(normals[0]).normalized();
+    double costheta = normals[1].dot(normals[0]) / (normals[1].norm() * normals[0].norm());
+    transform.rotate(Eigen::AngleAxisd(costheta, axis));
+    transform.translate(Eigen::Vector3d(0, 0, 1.5));
+    */
+
+    //Eigen::Affine3d transform(Eigen::Affine3d::Identity());
+    //transform.translate(Eigen::Vector3d(0, 0, 2.0));
     //transform.rotate(Eigen::Quaterniond(0.906614,-0.282680,-0.074009,-0.304411));
+
+
 
     // Kinect Simulator
     render_kinect::Simulate Simulator(cam_info, full_path.str(), dot_path);
 
     // Number of samples
-    int frames = 1;
+    int frames = 5;
     // Flags for what output data should be generated
     bool store_depth = 1;
     bool store_label = 1;
@@ -121,7 +176,18 @@ int main(int argc, char **argv) {
         // sample noisy transformation around initial one
         //getRandomTransform(0.02,0.02,0.02,0.05,noise);
         //Eigen::Affine3d current_tf = noise*transform;
+        Eigen::Affine3d transform(Eigen::Affine3d::Identity());
+        Eigen::Vector3d axis;
+        axis = normals[i+1].cross(normals[0]).normalized();
+        double costheta = acos(normals[i+1].dot(normals[0]) / (normals[i+1].norm() * normals[0].norm()));
+        std::cout << "axis = " << axis << std::endl;
+        std::cout << "cos = " << costheta << std::endl;
+        transform.rotate(Eigen::AngleAxisd(costheta, axis));
+        transform.translate(Eigen::Vector3d(0, 0, 2));
+        std::cout << transform.matrix() << std::endl;
         Eigen::Affine3d current_tf = transform;
+
+
 
         // give pose and object name to renderer
         Simulator.simulateMeasurement(current_tf, store_depth, store_label, store_pcd);

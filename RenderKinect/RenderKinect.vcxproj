@@ -58,15 +58,19 @@
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="GraphicsEnv.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="GraphicsEnv.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="GraphicsEnv.props" />
   </ImportGroup>
   <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+    <Import Project="GraphicsEnv.props" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -78,11 +82,11 @@
     <LibraryPath>$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-    <IncludePath>C:/Program Files/VTK/include/vtk-8.1;C:\env\openni\OpenNI2.2\Include;C:\env\pcl\PCL 1.8.1\include\pcl-1.8;C:\env\eigen\Eigen3.3.4;C:\env\Assimp\include;C:\env\libnoise\noise\include;C:\env\boost\boost_1_68_0_b1_rc2;C:\env\cgal\CGAL-4.12\auxiliary\gmp\include;C:\env\cgal\CGAL-4.12\build\include;C:\env\cgal\CGAL-4.12\include;C:\env\opencv\opencv3.4.2\build\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\VTK\include\vtk-8.1;C:\env\openni\OpenNI2.2\Include;C:\env\pcl\PCL 1.8.1\include\pcl-1.8;C:\env\eigen\Eigen3.3.4;C:\env\Assimp\include;C:\env\libnoise\noise\include;C:\env\boost\boost_1_68_0_b1_rc2;C:\env\cgal\CGAL-4.12\auxiliary\gmp\include;C:\env\cgal\CGAL-4.12\build\include;C:\env\cgal\CGAL-4.12\include;C:\env\opencv\opencv3.4.2\build\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files\VTK\lib;C:\env\openni\OpenNI2.2\Lib;C:\env\pcl\PCL 1.8.1\lib;C:\env\Assimp\lib\x64;C:\env\libnoise\noise\win32\Debug;C:\env\cgal\CGAL-4.12\build\lib\Debug;C:\env\cgal\CGAL-4.12\auxiliary\gmp\lib;C:\env\boost\boost_1_68_0_b1_rc2\lib64-msvc-14.1;C:\env\opencv\opencv3.4.2\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-    <IncludePath>C:/Program Files/VTK/include/vtk-8.1;C:\env\openni\OpenNI2.2\Include;C:\env\pcl\PCL 1.8.1\include\pcl-1.8;C:\env\eigen\Eigen3.3.4;C:\env\Assimp\include;C:\env\libnoise\noise\include;C:\env\boost\boost_1_68_0_b1_rc2;C:\env\cgal\CGAL-4.12\auxiliary\gmp\include;C:\env\cgal\CGAL-4.12\build\include;C:\env\cgal\CGAL-4.12\include;C:\env\opencv\opencv3.4.2\build\include;$(IncludePath)</IncludePath>
+    <IncludePath>C:\Program Files\VTK\include\vtk-8.1;C:\env\openni\OpenNI2.2\Include;C:\env\pcl\PCL 1.8.1\include\pcl-1.8;C:\env\eigen\Eigen3.3.4;C:\env\Assimp\include;C:\env\libnoise\noise\include;C:\env\boost\boost_1_68_0_b1_rc2;C:\env\cgal\CGAL-4.12\auxiliary\gmp\include;C:\env\cgal\CGAL-4.12\build\include;C:\env\cgal\CGAL-4.12\include;C:\env\opencv\opencv3.4.2\build\include;$(IncludePath)</IncludePath>
     <LibraryPath>C:\Program Files\VTK\lib;C:\env\openni\OpenNI2.2\Lib;C:\env\pcl\PCL 1.8.1\lib;C:\env\Assimp\lib\x64;C:\env\libnoise\noise\win32\Release;C:\env\cgal\CGAL-4.12\build\lib\Release;C:\env\cgal\CGAL-4.12\auxiliary\gmp\lib;C:\env\boost\boost_1_68_0_b1_rc2\lib64-msvc-14.1;C:\env\opencv\opencv3.4.2\build\x64\vc15\lib;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">

@@ -142,12 +142,12 @@ namespace render_kinect {
             minima_ = vertices_.rowwise().minCoeff();
             means_ = vertices_.rowwise().mean();
             // DEBUG
-            std::cout << "Row maximum (x,y,z,1): " << std::endl
-                << maxima_ << std::endl;
-            std::cout << "Row minimum (x,y,z,1): " << std::endl
-                << minima_ << std::endl;
-            std::cout << "Row mean (x,y,z,1): " << std::endl
-                << means_ << std::endl;
+            //std::cout << "Row maximum (x,y,z,1): " << std::endl
+            //    << maxima_ << std::endl;
+            //std::cout << "Row minimum (x,y,z,1): " << std::endl
+            //    << minima_ << std::endl;
+            //std::cout << "Row mean (x,y,z,1): " << std::endl
+            //    << means_ << std::endl;
 
             // try to normalize the mesh model
             // restricted in a 0.5 x 0.5 cube
@@ -155,8 +155,6 @@ namespace render_kinect {
             vertices_ /= 2 * (maxima_ - minima_).maxCoeff();
             // restore 1 in row 3
             vertices_.row(3) = test.transpose();
-            std::cout << "Row mean (x,y,z,1): " << std::endl
-                << vertices_.rowwise().mean() << std::endl;
 
 
             original_transform_ = Eigen::Affine3d::Identity();
