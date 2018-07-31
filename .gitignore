@@ -263,3 +263,6 @@ __pycache__/
 # temp folder
 tmp/
 obj_models/
+
+# third party storage
+third_party/
