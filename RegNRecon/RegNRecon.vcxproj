@@ -121,7 +121,22 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="ConfigMap.cpp" />
+    <ClCompile Include="jly_3ddt.cpp" />
+    <ClCompile Include="jly_goicp.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="matrix.cpp" />
+    <ClCompile Include="StringTokenizer.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="ConfigMap.hpp" />
+    <ClInclude Include="jly_3ddt.h" />
+    <ClInclude Include="jly_goicp.h" />
+    <ClInclude Include="jly_icp3d.hpp" />
+    <ClInclude Include="jly_sorting.hpp" />
+    <ClInclude Include="matrix.h" />
+    <ClInclude Include="nanoflann.hpp" />
+    <ClInclude Include="StringTokenizer.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

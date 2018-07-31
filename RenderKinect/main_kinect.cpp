@@ -89,8 +89,8 @@ int main(int argc, char **argv) {
     
     cam_info.z_near = 0.5;
     cam_info.z_far = 6.0;
-    cam_info.fx_ = 580.0;
-    cam_info.fy_ = 580.0;
+    cam_info.fx_ = 300.0;
+    cam_info.fy_ = 300.0;
     // baseline between IR projector and IR camera
     cam_info.tx_ = 0.075;
 
@@ -131,9 +131,9 @@ int main(int argc, char **argv) {
                 {
                     normals[cnt] << 1, i, j;
                 }
+                ++cnt;
             }
         }
-        ++cnt;
     }
 
     Eigen::Vector3d bad_normal(0, 0, -1);
@@ -173,29 +173,42 @@ int main(int argc, char **argv) {
 
     // Storage of random transform
     Eigen::Affine3d noise;
-    for(int i=0; i<frames; ++i) {
-        
-        // sample noisy transformation around initial one
-        //getRandomTransform(0.02,0.02,0.02,0.05,noise);
-        //Eigen::Affine3d current_tf = noise*transform;
-        Eigen::Affine3d transform(Eigen::Affine3d::Identity());
-        Eigen::Vector3d axis;
-        axis = normals[i].cross(bad_normal).normalized();
-        double costheta = acos(normals[i].dot(bad_normal) / (normals[i].norm() * bad_normal.norm()));
-        std::cout << "axis = " << axis << std::endl;
-        std::cout << "cos = " << costheta << std::endl;
-        transform.translate(Eigen::Vector3d(0, 0, 2));
-        std::cout << transform.matrix() << std::endl;
-        transform.rotate(Eigen::AngleAxisd(costheta, axis));
-        std::cout << transform.matrix() << std::endl;
-        Eigen::Affine3d current_tf = transform;
-
-
-
-        // give pose and object name to renderer
+    Eigen::Affine3d transform(Eigen::Affine3d::Identity());
+    transform.translate(Eigen::Vector3d(0, 0, 1.5));
+    transform.rotate(Eigen::Quaterniond(0.906614, -0.282680, -0.074009, -0.304411));
+    for (int i = 0; i < 2; i++) {
+        getRandomTransform(0.02, 0.02, 0.02, 0.1, noise);
+        Eigen::Affine3d current_tf = noise * transform;
         Simulator.simulateMeasurement(current_tf, store_depth, store_label, store_pcd);
-        
     }
+    //ofstream transLog;
+    //transLog.open("transLog.txt", ios::out);
+    //for(int i=0; i<frames; ++i) {
+    //    
+    //    // sample noisy transformation around initial one
+    //    //getRandomTransform(0.02,0.02,0.02,0.05,noise);
+    //    //Eigen::Affine3d current_tf = noise*transform;
+    //    Eigen::Affine3d transform(Eigen::Affine3d::Identity());
+    //    Eigen::Vector3d axis;
+    //    axis = normals[i].cross(bad_normal).normalized();
+    //    double costheta = acos(normals[i].dot(bad_normal) / (normals[i].norm() * bad_normal.norm()));
+    //    std::cout << "axis = " << axis << std::endl;
+    //    std::cout << "cos = " << costheta << std::endl;
+    //    transform.translate(Eigen::Vector3d(0, 0, 1.5));
+    //    std::cout << transform.matrix() << std::endl;
+    //    transform.rotate(Eigen::AngleAxisd(costheta, axis));
+    //    std::cout << transform.matrix() << std::endl;
+    //    Eigen::Affine3d current_tf = transform;
 
+    //    transLog << "Transform Matrix " << i << ":" << endl;
+    //    // transLog << costheta << " " << axis << endl;
+    //    transLog << current_tf.matrix() << endl;
+
+
+    //    // give pose and object name to renderer
+    //    Simulator.simulateMeasurement(current_tf, store_depth, store_label, store_pcd);
+    //    
+    //}
+    //transLog.close();
     return 0;
 }

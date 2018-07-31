@@ -151,12 +151,12 @@ namespace render_kinect {
                 if (pcl::io::savePCDFileASCII(lD.str(), cloud) != 0)
                     std::cout << "Couldn't store point cloud at " << lD.str() << std::endl;
                 else {
-                    pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
+                    /*pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
                     pcl::PointCloud<pcl::PointXYZ>::Ptr p_cloud(new pcl::PointCloud<pcl::PointXYZ>);
                     pcl::io::loadPCDFile(lD.str(), *p_cloud);
                     viewer.showCloud(p_cloud);
 
-                    while (!viewer.wasStopped()) {}
+                    while (!viewer.wasStopped()) {}*/
                 }
                 #else
                 std::cout << "Couldn't store point cloud since PCL is not installed." << std::endl;
