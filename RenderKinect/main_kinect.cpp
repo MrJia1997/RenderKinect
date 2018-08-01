@@ -63,6 +63,54 @@ void getRandomTransform(const double &p_x,
     p_tf.rotate(Eigen::AngleAxisd( p_angle*(double)(rand()%2000 - 1000)/1000, axis));
 }
 
+std::vector<Eigen::Affine3d> getView(const Eigen::Vector3d& camera_normal, int horizontal_count, int vertical_count)
+{
+    // horizontal range = 0 .. 2 * PI
+    // vertical range   = 0 ..     PI (supposed to be -1/2 * PI .. 1/2 * PI as longitude and latitude)
+    
+    std::vector<Eigen::Affine3d> views;
+
+    double horizontal_angle = 2 * M_PI / horizontal_count;
+    double vertical_angle = M_PI / (vertical_count - 1);
+    
+    for (int i = 0; i < vertical_count; ++i)
+    {
+        for (int j = 0; j < horizontal_count; ++j)
+        //for (int j = 0; j < 1; ++j)
+        {
+            if ((i == 0 || i == vertical_count - 1) && j)
+            {
+                // 1 view is enough for the north & south pole
+                continue;
+            }
+
+            Eigen::Affine3d transform(Eigen::Affine3d::Identity());
+            double horizontal_spin = horizontal_angle * j;
+            double vertical_spin = vertical_angle * i;
+
+            Eigen::Matrix3d rotation;
+            Eigen::Matrix3d aaa, bbb;
+            aaa = Eigen::AngleAxisd(vertical_spin, Eigen::Vector3d::UnitY());
+            bbb = Eigen::AngleAxisd(horizontal_spin, camera_normal);
+            // std::cout << "hey aaa" << std::endl << aaa << std::endl;
+            // std::cout << "hey bbb" << std::endl << bbb << std::endl;
+            rotation = Eigen::AngleAxisd(vertical_spin, Eigen::Vector3d::UnitY()) * Eigen::AngleAxisd(horizontal_spin, camera_normal);
+            // std::cout << rotation << std::endl << "=====" << std::endl;
+            transform.translate(Eigen::Vector3d(0, 0, 1.5));
+            // std::cout << transform.matrix() << std::endl << "=====" << std::endl;
+            transform.rotate(rotation);
+            // std::cout << transform.matrix() << std::endl << "=====" << std::endl;
+            // std::cout << "vertical_spin = " << vertical_spin << std::endl;
+            // transform.rotate(Eigen::AngleAxisd(horizontal_spin, camera_normal));
+            // transform.rotate(Eigen::AngleAxisd(vertical_spin, Eigen::Vector3d::UnitY()));
+
+            views.push_back(transform);
+        }
+    }
+
+    return views;
+}
+
 // main function that generated a number of sample outputs for a given object mesh. 
 int main(int argc, char **argv) {
   
@@ -136,7 +184,9 @@ int main(int argc, char **argv) {
         }
     }
 
-    Eigen::Vector3d bad_normal(0, 0, -1);
+    Eigen::Vector3d camera_normal(0, 0, -1);
+    // std::vector<Eigen::Affine3d> views = getView(camera_normal, 8, 7);
+    std::vector<Eigen::Affine3d> views = getView(camera_normal, 18, 13);
 
     /*Eigen::Vector3d normals[6];
     normals[0] << -1, 0, 0;
@@ -165,20 +215,23 @@ int main(int argc, char **argv) {
     render_kinect::Simulate Simulator(cam_info, full_path.str(), dot_path);
 
     // Number of samples
-    int frames = 20;
+    // int frames = 20;
+    int frames = views.size();
     // Flags for what output data should be generated
     bool store_depth = 1;
     bool store_label = 1;
     bool store_pcd = 1;
-
+    // std::cout << "good1\n";
     // Storage of random transform
     Eigen::Affine3d noise;
     Eigen::Affine3d transform(Eigen::Affine3d::Identity());
     transform.translate(Eigen::Vector3d(0, 0, 1.5));
     transform.rotate(Eigen::Quaterniond(0.906614, -0.282680, -0.074009, -0.304411));
-    for (int i = 0; i < 2; i++) {
-        getRandomTransform(0.02, 0.02, 0.02, 0.1, noise);
-        Eigen::Affine3d current_tf = noise * transform;
+    for (int i = 0; i < frames; i++) {
+        std::cout << "i = " << i << std::endl;
+        // getRandomTransform(0.02, 0.02, 0.02, 0.1, noise);
+        // Eigen::Affine3d current_tf = noise * transform;
+        Eigen::Affine3d current_tf = views[i];
         Simulator.simulateMeasurement(current_tf, store_depth, store_label, store_pcd);
     }
     //ofstream transLog;
@@ -210,5 +263,6 @@ int main(int argc, char **argv) {
     //    
     //}
     //transLog.close();
+    system("pause");
     return 0;
 }
