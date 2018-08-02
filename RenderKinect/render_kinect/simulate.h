@@ -90,6 +90,46 @@ namespace render_kinect {
             delete object_model_;
         }
 
+        void keypointMeasurement(const Eigen::Affine3d &new_tf) {
+            for (int i = 0; i < 6; i++) {
+                PointCloud_I::Ptr keypoints(new PointCloud_I);
+                object_model_->calcKeypoints(keypoints, i);
+                if (keypoints->size() <= 0)
+                    continue;
+                std::stringstream ss;
+                ss << out_path_ << "keypoint_" << i << ".pcd";
+                pcl::io::savePCDFileASCII(ss.str(), *keypoints);
+                
+                //pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
+                //viewer.showCloud(keypoints);
+                //while (!viewer.wasStopped()) {}
+                
+            }
+            
+        }
+
+        void calckeypointVisible(const Eigen::Affine3d &new_tf, std::vector<int> &visibleKeypointIndices) {
+            visibleKeypointIndices.clear();
+            
+            PointCloud_I::Ptr p_cloud(new PointCloud_I);
+            std::stringstream ss;
+            ss << out_path_ << "keypoint_" << 4 << ".pcd";
+            pcl::io::loadPCDFile(ss.str(), *p_cloud);
+            int size = p_cloud->size();
+
+            Eigen::MatrixXd keypoints;
+            keypoints.resize(4, size);
+            for (int i = 0; i < size; i++) {
+                keypoints(0, i) = p_cloud->points[i].x; 
+                keypoints(1, i) = p_cloud->points[i].y;
+                keypoints(2, i) = p_cloud->points[i].z;
+                keypoints(3, i) = 1;
+            }
+
+            object_model_->testVisible(new_tf, keypoints, visibleKeypointIndices);
+
+        }
+
         void simulateMeasurement(const Eigen::Affine3d &new_tf, bool store_depth, bool store_label, bool store_pcd) {
             countf++;
             

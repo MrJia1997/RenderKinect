@@ -75,8 +75,7 @@
 //static const int prec = 5;
 
 namespace render_kinect {
-
-  // Constructor
+    // Constructor
     KinectSimulator::KinectSimulator(const CameraInfo &p_camera_info,
                     std::string object_name,
                     std::string dot_path) 
@@ -172,6 +171,47 @@ namespace render_kinect {
         search_->tree.accelerate_distance_queries();
     }
     
+    void KinectSimulator::testVisible(const Eigen::Affine3d & p_tf,
+        const Eigen::MatrixXd &keypoints,
+        std::vector<int> &resultIndices)
+    {
+        updateObjectPoses(p_tf);
+        updateTree();
+
+        auto distance = [](const Point A, const Point B) {
+            return sqrt(
+                (A.x() - B.x()) * (A.x() - B.x()) +
+                (A.y() - B.y()) * (A.y() - B.y()) +
+                (A.z() - B.z()) * (A.z() - B.z()));
+        };
+        
+        std::cout << p_tf.matrix() << std::endl;
+        Eigen::MatrixXd trans_keypoints = p_tf.matrix() * keypoints;
+        int len = trans_keypoints.cols();
+        for (int i = 0; i < len; i++) {
+            Eigen::VectorXd k = trans_keypoints.col(i);
+            //std::cout << "Keypoint after transformation: " << k.transpose() << std::endl;
+            
+            Point p(k(0, 0), k(1, 0), k(2, 0));
+            bool reach_mesh = search_->tree.do_intersect(Ray(Point(0, 0, 0), p));
+            if (reach_mesh) {
+                Ray_intersection intersection_ = search_->tree.first_intersection(
+                    Ray(Ray(Point(0, 0, 0), p)));
+                Point *p_intersection = boost::get<Point>(&(intersection_->first));
+                if (distance(Point(0, 0, 0), p) - distance(Point(0, 0, 0), *p_intersection) > 1e-4) {
+                    // the keypoint is invisible
+                }
+                else {
+                    resultIndices.push_back(i);
+                }
+            }
+            else {
+                resultIndices.push_back(i);
+            }
+        }
+        
+    }
+
     // Function that intersects rays with the object model at current state.
     void KinectSimulator::intersect(const Eigen::Affine3d &p_transform, 
                     cv::Mat &point_cloud,

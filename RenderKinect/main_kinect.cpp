@@ -148,7 +148,7 @@ int main(int argc, char **argv) {
     cam_info.noise_ = render_kinect::NONE;
 
     // Test Transform
-    double phi = (1.0 + sqrt(5.0)) / 2.0;
+    /*double phi = (1.0 + sqrt(5.0)) / 2.0;
     double phi_inv = 1.0 / phi;
     
     Eigen::Vector3d normals[20];
@@ -182,7 +182,7 @@ int main(int argc, char **argv) {
                 ++cnt;
             }
         }
-    }
+    }*/
 
     Eigen::Vector3d camera_normal(0, 0, -1);
     // std::vector<Eigen::Affine3d> views = getView(camera_normal, 8, 7);
@@ -205,14 +205,10 @@ int main(int argc, char **argv) {
     transform.translate(Eigen::Vector3d(0, 0, 1.5));
     */
 
-    //Eigen::Affine3d transform(Eigen::Affine3d::Identity());
-    //transform.translate(Eigen::Vector3d(0, 0, 2.0));
-    //transform.rotate(Eigen::Quaterniond(0.906614,-0.282680,-0.074009,-0.304411));
-
 
 
     // Kinect Simulator
-    render_kinect::Simulate Simulator(cam_info, full_path.str(), dot_path);
+    //render_kinect::Simulate Simulator(cam_info, full_path.str(), dot_path);
 
     // Number of samples
     // int frames = 20;
@@ -222,47 +218,72 @@ int main(int argc, char **argv) {
     bool store_label = 1;
     bool store_pcd = 1;
     // std::cout << "good1\n";
+    
+    
+    
     // Storage of random transform
-    Eigen::Affine3d noise;
+    /*Eigen::Affine3d noise;
     Eigen::Affine3d transform(Eigen::Affine3d::Identity());
     transform.translate(Eigen::Vector3d(0, 0, 1.5));
-    transform.rotate(Eigen::Quaterniond(0.906614, -0.282680, -0.074009, -0.304411));
+    transform.rotate(Eigen::Quaterniond(0.906614, -0.282680, -0.074009, -0.304411));*/
+    
+    
+    
+    // calculate keypoints
+    /*Simulator.keypointMeasurement(Eigen::Affine3d::Identity());
+    std::vector<std::vector<int>> visibleResult;
     for (int i = 0; i < frames; i++) {
         std::cout << "i = " << i << std::endl;
-        // getRandomTransform(0.02, 0.02, 0.02, 0.1, noise);
-        // Eigen::Affine3d current_tf = noise * transform;
         Eigen::Affine3d current_tf = views[i];
-        Simulator.simulateMeasurement(current_tf, store_depth, store_label, store_pcd);
+        std::vector<int> visibleKeypointIndices;
+        Simulator.calckeypointVisible(current_tf, visibleKeypointIndices);
+        visibleResult.push_back(visibleKeypointIndices);
     }
+    ofstream transLog, poseKeypointResult;
+    transLog.open("trans_log_200.txt", ios::out);
+    poseKeypointResult.open("pose_keypoint_200_" + std::string(argv[1]) + ".txt", ios::out);
+    for (int i = 0; i < frames; i++) {
+        transLog << "Pose Transform Matrix " << i << ":" << std::endl;
+        transLog << views[i].matrix() << std::endl;
+        poseKeypointResult << "Pose Visible Keypoints Indices " << i << ":" << std::endl;
+        for (int id : visibleResult[i])
+            poseKeypointResult << id << " ";
+        poseKeypointResult << std::endl;
+    }
+    transLog.close();
+    poseKeypointResult.close();
+    std::cout << "Calculate keypoints visibility finished." << std::endl;*/
+    
+    
+    // calculate set cover
+    
+    ifstream poseKeypointResult;
+    std::vector<std::vector<int>> visibleResult;
+
+    
+    
+    
+    // get scans from different poses
     //ofstream transLog;
-    //transLog.open("transLog.txt", ios::out);
-    //for(int i=0; i<frames; ++i) {
-    //    
-    //    // sample noisy transformation around initial one
-    //    //getRandomTransform(0.02,0.02,0.02,0.05,noise);
-    //    //Eigen::Affine3d current_tf = noise*transform;
-    //    Eigen::Affine3d transform(Eigen::Affine3d::Identity());
-    //    Eigen::Vector3d axis;
-    //    axis = normals[i].cross(bad_normal).normalized();
-    //    double costheta = acos(normals[i].dot(bad_normal) / (normals[i].norm() * bad_normal.norm()));
-    //    std::cout << "axis = " << axis << std::endl;
-    //    std::cout << "cos = " << costheta << std::endl;
-    //    transform.translate(Eigen::Vector3d(0, 0, 1.5));
-    //    std::cout << transform.matrix() << std::endl;
-    //    transform.rotate(Eigen::AngleAxisd(costheta, axis));
-    //    std::cout << transform.matrix() << std::endl;
-    //    Eigen::Affine3d current_tf = transform;
-
-    //    transLog << "Transform Matrix " << i << ":" << endl;
-    //    // transLog << costheta << " " << axis << endl;
-    //    transLog << current_tf.matrix() << endl;
-
-
-    //    // give pose and object name to renderer
+    //transLog.open("trans_log_200.txt", ios::out);
+    //for (int i = 0; i < frames; i++) {
+    //    std::cout << "i = " << i << std::endl;
+    //    //transLog << "Transform Matrix " << i << ":" << endl;
+    //    // getRandomTransform(0.02, 0.02, 0.02, 0.1, noise);
+    //    // Eigen::Affine3d current_tf = noise * transform;
+    //    Eigen::Affine3d current_tf = views[i];
+    //    //transLog << current_tf.matrix() << endl;
     //    Simulator.simulateMeasurement(current_tf, store_depth, store_label, store_pcd);
-    //    
     //}
     //transLog.close();
+    
+    
+    
+    
+    
+
+    //Simulator.simulateMeasurement(current_tf, store_depth, store_label, store_pcd);
+    
     system("pause");
     return 0;
 }

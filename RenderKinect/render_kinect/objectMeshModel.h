@@ -67,6 +67,14 @@
 #include <CGAL/intersections.h>
 #include <CGAL/Bbox_3.h>
 
+#include <pcl/point_cloud.h>
+#include <pcl/point_types.h>
+#include <pcl/io/pcd_io.h>
+#include <pcl/io/obj_io.h>
+#include <pcl/keypoints/sift_keypoint.h>
+#include <pcl/keypoints/harris_3d.h>
+
+
 typedef CGAL::Simple_cartesian<double> K;
 typedef K::Point_3 Point;
 typedef K::Segment_3 Segment;
@@ -84,6 +92,14 @@ typedef Tree::Primitive_id Primitive_id;
 typedef Tree::Object_and_primitive_id Object_and_Primitive_id;
 typedef boost::optional< Tree::Intersection_and_primitive_id<Ray>::Type > Ray_intersection;
 
+typedef pcl::PointXYZ PointT;
+typedef pcl::PointXYZI PointT_I;
+typedef pcl::PointCloud<PointT> PointCloud;
+typedef pcl::PointCloud<PointT_I> PointCloud_I;
+typedef pcl::SIFTKeypoint<PointT, PointT_I> SIFTKeypoint;
+typedef pcl::HarrisKeypoint3D<PointT, PointT_I> HarrisKeypoint;
+
+
 struct TreeAndTri {
     std::vector<K::Triangle_3> triangles;
     std::vector<K::Point_3> points;
@@ -92,6 +108,15 @@ struct TreeAndTri {
 };
 
 namespace render_kinect {
+    enum {
+        SIFT,
+        HARRIS,
+        TOMASI,
+        NOBLE,
+        LOWE,
+        CURVATURE
+    };
+    
     // Class that stores all the object geometry information and transformation
     class ObjectMeshModel
     {
@@ -103,6 +128,8 @@ namespace render_kinect {
         unsigned numVertices_;
         Eigen::Affine3d original_transform_;
         Eigen::Affine3d transform_;
+
+        PointCloud::Ptr model_;
 
     public:
         // Constructor that loads the geometry from a given file name
@@ -156,11 +183,20 @@ namespace render_kinect {
             // restore 1 in row 3
             vertices_.row(3) = test.transpose();
 
+            model_ = PointCloud::Ptr(new PointCloud);
+            model_->resize(numVertices_);
+            for (int i = 0; i < numVertices_; i++) {
+                model_->points[i].x = vertices_(0, i);
+                model_->points[i].y = vertices_(1, i);
+                model_->points[i].z = vertices_(2, i);
+            }
 
             original_transform_ = Eigen::Affine3d::Identity();
         }
     
-        void deallocateScene() { aiReleaseImport(scene_); }
+        void deallocateScene() { 
+            aiReleaseImport(scene_);
+        }
          
         unsigned getNumFaces() { return numFaces_; }
 
@@ -208,6 +244,58 @@ namespace render_kinect {
             search->part_ids.resize(numFaces_);
             for (unsigned t = 0; t < numFaces_; ++t)
                 search->part_ids[t] = id;
+        }
+
+        // calculate keypoints
+        void calcKeypoints(PointCloud_I::Ptr keypoints, int type) {
+            boost::shared_ptr<pcl::Keypoint<pcl::PointXYZ, pcl::PointXYZI> > keypoint_detector;
+            if (type == SIFT) {
+                /*SIFTKeypoint* sift3D = new SIFTKeypoint;
+                sift3D->setScales(0.01, 3, 2);
+                sift3D->setMinimumContrast(0.0);
+                keypoint_detector.reset(sift3D);*/
+                std::cout << "SIFT is not supported yet." << std::endl;
+                return;
+            }
+            else {
+                HarrisKeypoint* harris3D = new HarrisKeypoint;
+                harris3D->setNonMaxSupression(true);
+                harris3D->setRadius(0.02);
+                harris3D->setRadiusSearch(0.02); 
+                keypoint_detector.reset(harris3D);
+                switch (type)
+                {
+                case HARRIS:
+                    harris3D->setMethod(HarrisKeypoint::HARRIS);
+                    break;
+
+                case TOMASI:
+                    harris3D->setMethod(HarrisKeypoint::TOMASI);
+                    break;
+
+                case NOBLE:
+                    harris3D->setMethod(HarrisKeypoint::NOBLE);
+                    break;
+
+                case LOWE:
+                    harris3D->setMethod(HarrisKeypoint::LOWE);
+                    break;
+
+                case CURVATURE:
+                    harris3D->setMethod(HarrisKeypoint::CURVATURE);
+                    break;
+                default:
+                    pcl::console::print_error("unknown key point detection method %d\n expecting values between 0 and 5", type);
+                    exit(1);
+                    break;
+                }
+            }
+
+            std::cout << "keypoint detection..." << std::flush;
+            keypoint_detector->setInputCloud(model_);
+            keypoint_detector->setSearchSurface(model_);
+            keypoint_detector->compute(*keypoints);
+            std::cout << "OK. keypoints found: " << keypoints->points.size() << std::endl;
         }
 
     };

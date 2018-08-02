@@ -93,6 +93,7 @@ namespace render_kinect {
         // whether label image should overlap with the noisy depth image
         bool noisy_labels_;
 
+
     public:
         
         std::vector<cv::Scalar> color_map_;
@@ -104,6 +105,16 @@ namespace render_kinect {
             cv::Mat &point_cloud,
             cv::Mat &depth_map,
             cv::Mat &labels);
+
+        // calculate keypoints
+        void calcKeypoints(PointCloud_I::Ptr keypoints, int type) {
+            model_->calcKeypoints(keypoints, type);
+        }
+
+        // test visible
+        void testVisible(const Eigen::Affine3d &p_tf, 
+            const Eigen::MatrixXd &keypoints, 
+            std::vector<int> &resultIndices);
 
         KinectSimulator(const CameraInfo &p_camera_info,
                 std::string object_name,
