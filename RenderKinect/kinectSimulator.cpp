@@ -238,9 +238,9 @@ namespace render_kinect {
         int n_occluded = 0;
         vec.reserve(camera_.getHeight() * camera_.getWidth());
 
-        #ifdef HAVE_OPENMP
+        /*#ifdef HAVE_OPENMP
         #pragma omp parallel for collapse(2)
-        #endif
+        #endif*/
         for (int c=0; c<camera_.getWidth(); ++c) {
             for (int r=0; r<camera_.getHeight(); ++r) {
                 // compute ray from pixel and camera configuration

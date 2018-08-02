@@ -42,8 +42,11 @@
 #include "render_kinect/simulate.h"
 #include "render_kinect/camera.h"
 
+#include "set_cover.h"
+
 #include <iostream>
 #include <fstream>
+#include <boost/algorithm/string.hpp>
 
 /* Sampling of random 6DoF transformations. */
 void getRandomTransform(const double &p_x,
@@ -113,12 +116,12 @@ std::vector<Eigen::Affine3d> getView(const Eigen::Vector3d& camera_normal, int h
 
 // main function that generated a number of sample outputs for a given object mesh. 
 int main(int argc, char **argv) {
-  
-    if(argc<2){
+
+    if (argc < 2) {
         std::cerr << "Usage: " << argv[0] << " model_file.obj" << std::endl;
         exit(-1);
     }
-    
+
     // Get the path to the object mesh model.
     std::string object_models_dir = "../obj_models/";
     std::stringstream full_path;
@@ -126,15 +129,15 @@ int main(int argc, char **argv) {
 
     // Get the path to the dot pattern
     std::string dot_path = "../data/kinect-pattern_3x3.png";
-    
+
     // Camera Parameters
     render_kinect::CameraInfo cam_info;
-    
+
     cam_info.width = 640;
     cam_info.height = 480;
     cam_info.cx_ = 320;
     cam_info.cy_ = 240;
-    
+
     cam_info.z_near = 0.5;
     cam_info.z_far = 6.0;
     cam_info.fx_ = 300.0;
@@ -150,7 +153,7 @@ int main(int argc, char **argv) {
     // Test Transform
     /*double phi = (1.0 + sqrt(5.0)) / 2.0;
     double phi_inv = 1.0 / phi;
-    
+
     Eigen::Vector3d normals[20];
     int cnt = 0;
     for (int k = 0; k < 5; ++k)
@@ -218,17 +221,17 @@ int main(int argc, char **argv) {
     bool store_label = 1;
     bool store_pcd = 1;
     // std::cout << "good1\n";
-    
-    
-    
+
+
+
     // Storage of random transform
     /*Eigen::Affine3d noise;
     Eigen::Affine3d transform(Eigen::Affine3d::Identity());
     transform.translate(Eigen::Vector3d(0, 0, 1.5));
     transform.rotate(Eigen::Quaterniond(0.906614, -0.282680, -0.074009, -0.304411));*/
-    
-    
-    
+
+
+
     // calculate keypoints
     /*Simulator.keypointMeasurement(Eigen::Affine3d::Identity());
     std::vector<std::vector<int>> visibleResult;
@@ -253,16 +256,28 @@ int main(int argc, char **argv) {
     transLog.close();
     poseKeypointResult.close();
     std::cout << "Calculate keypoints visibility finished." << std::endl;*/
-    
-    
-    // calculate set cover
-    
-    ifstream poseKeypointResult;
-    std::vector<std::vector<int>> visibleResult;
 
+
+    // calculate set cover
+
+    ifstream poseKeypointResult;
+    std::vector<std::set<int>> visibleResult;
+    poseKeypointResult.open("pose_keypoint_200_" + std::string(argv[1]) + ".txt", ios::in);
+    std::string s;
+    while (getline(poseKeypointResult, s)) {
+        std::set<int> set;
+        getline(poseKeypointResult, s);
+        std::vector<std::string> indices;
+        boost::split(indices, s, boost::is_any_of(" "));
+        for (auto id : indices)
+            set.insert(atoi(id.c_str()));
+        visibleResult.push_back(set);
+    }
+    poseKeypointResult.close();
     
+    calcSetCoverGreedy(visibleResult, 573, 0.5);
     
-    
+    int a = 0;
     // get scans from different poses
     //ofstream transLog;
     //transLog.open("trans_log_200.txt", ios::out);
