@@ -146,7 +146,7 @@ namespace render_kinect {
 
         }
 
-        void simulateMeasurement(const Eigen::Affine3d &new_tf, bool store_depth, bool store_label, bool store_pcd) {
+        void simulateMeasurement(const Eigen::Affine3d &new_tf, bool store_depth, bool store_label, bool store_pcd, std::string model_name) {
             countf++;
             
             // update old transform
@@ -168,7 +168,7 @@ namespace render_kinect {
             // store on disk
             if (store_depth) {
                 std::stringstream lD;
-                lD << out_path_ << "depth_orig" << std::setw(3) << std::setfill('0')
+                lD << out_path_ << "depth_orig_" << model_name << "_" << std::setw(3) << std::setfill('0')
                 << countf << ".png";
                 convertScaleAbs(depth_im_, scaled_im_, 255.0f);
                 cv::imwrite(lD.str().c_str(), scaled_im_);
@@ -177,7 +177,7 @@ namespace render_kinect {
             // store on disk
             if (store_label) {
                 std::stringstream lD;
-                lD << out_path_ << "labels" << std::setw(3) << std::setfill('0')
+                lD << out_path_ << "labels" << model_name << "_" << std::setw(3) << std::setfill('0')
                 << countf << ".png";
                 cv::imwrite(lD.str().c_str(), labels_);
             }
@@ -187,7 +187,7 @@ namespace render_kinect {
 
                 #ifdef HAVE_PCL
                 std::stringstream lD;
-                lD << out_path_ << "point_cloud" << std::setw(3)
+                lD << out_path_ << "point_cloud_" << model_name << "_" << std::setw(3)
                 << std::setfill('0') << countf << ".pcd";
 
                 pcl::PointCloud<pcl::PointXYZ> cloud;

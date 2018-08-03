@@ -150,42 +150,6 @@ int main(int argc, char **argv) {
     //  cam_info.noise_ = render_kinect::PERLIN;
     cam_info.noise_ = render_kinect::NONE;
 
-    // Test Transform
-    /*double phi = (1.0 + sqrt(5.0)) / 2.0;
-    double phi_inv = 1.0 / phi;
-
-    Eigen::Vector3d normals[20];
-    int cnt = 0;
-    for (int k = 0; k < 5; ++k)
-    {
-        for (int i = -1; i <= 1; i += 2)
-        {
-            for (int j = -1; j <= 1; j += 2)
-            {
-                if (k == 0)
-                {
-                    normals[cnt] << 0, i * phi, j * phi_inv;
-                }
-                else if (k == 1)
-                {
-                    normals[cnt] << i * phi_inv, 0, j * phi;
-                }
-                else if (k == 2)
-                {
-                    normals[cnt] << i * phi, j * phi_inv, 0;
-                }
-                else if (k == 3)
-                {
-                    normals[cnt] << -1, i, j;
-                }
-                else if (k == 4)
-                {
-                    normals[cnt] << 1, i, j;
-                }
-                ++cnt;
-            }
-        }
-    }*/
 
     Eigen::Vector3d camera_normal(0, 0, -1);
     // std::vector<Eigen::Affine3d> views = getView(camera_normal, 8, 7);
@@ -217,8 +181,6 @@ int main(int argc, char **argv) {
     bool store_pcd = 1;
     // std::cout << "good1\n";
 
-
-
     // Storage of random transform
     /*Eigen::Affine3d noise;
     Eigen::Affine3d transform(Eigen::Affine3d::Identity());
@@ -231,122 +193,112 @@ int main(int argc, char **argv) {
     //// calculate keypoints
     ////Simulator.keypointMeasurement();
     //Simulator.subsampling();
-    //std::vector<std::vector<int>> visibleResult;
+    //std::vector<std::vector<int>> visible_result;
     //for (int i = 0; i < frames; i++) {
     //    std::cout << "i = " << i << std::endl;
     //    Eigen::Affine3d current_tf = views[i];
     //    std::vector<int> visibleKeypointIndices;
     //    Simulator.calckeypointVisible(current_tf, visibleKeypointIndices);
-    //    visibleResult.push_back(visibleKeypointIndices);
+    //    visible_result.push_back(visibleKeypointIndices);
     //}
-    //ofstream transLog, poseKeypointResult;
-    //transLog.open("trans_log_200.txt", ios::out);
-    //poseKeypointResult.open("pose_keypoint_200_" + std::string(argv[1]) + ".txt", ios::out);
+    //ofstream trans_log, out_visible_result;
+    //trans_log.open("trans_log_200.txt", ios::out);
+    //out_visible_result.open("pose_keypoint_200_" + std::string(argv[1]) + ".txt", ios::out);
     //for (int i = 0; i < frames; i++) {
-    //    transLog << "Pose Transform Matrix " << i << ":" << std::endl;
-    //    transLog << views[i].matrix() << std::endl;
-    //    poseKeypointResult << "Pose Visible Keypoints Indices " << i << ":" << std::endl;
-    //    for (int id : visibleResult[i])
-    //        poseKeypointResult << id << " ";
-    //    poseKeypointResult << std::endl;
+    //    trans_log << "Pose Transform Matrix " << i << ":" << std::endl;
+    //    trans_log << views[i].matrix() << std::endl;
+    //    out_visible_result << "Pose Visible Keypoints Indices " << i << ":" << std::endl;
+    //    for (int id : visible_result[i])
+    //        out_visible_result << id << " ";
+    //    out_visible_result << std::endl;
     //}
-    //transLog.close();
-    //poseKeypointResult.close();
+    //trans_log.close();
+    //out_visible_result.close();
     //std::cout << "Calculate keypoints visibility finished." << std::endl;
 
 
-    // test subsample visible
-    /*PointCloud::Ptr sample_points(new PointCloud);
-    pcl::PointCloud<pcl::PointXYZRGB>::Ptr sample_points_visible(new pcl::PointCloud<pcl::PointXYZRGB>);
-    pcl::io::loadPCDFile("../tmp/sample_points.pcd", *sample_points);
-    int total = sample_points->size();
-    std::vector<bool> total_flag(total, false);
-    for (auto set : visibleResult) {
-        for (auto ele : set) {
-            if (ele >= 0 && ele < total) {
-                total_flag[ele] = true;
-            }
-            else {
-                std::cerr << "Element out of range." << std::endl;
-                exit(-1);
-            }
-        }
-    }
-    sample_points_visible->resize(total);
-    for (int i = 0; i < total; i++) {
-        sample_points_visible->points[i].x = sample_points->points[i].x;
-        sample_points_visible->points[i].y = sample_points->points[i].y;
-        sample_points_visible->points[i].z = sample_points->points[i].z;
-        if (total_flag[i]) {
-            sample_points_visible->points[i].r = 255;
-            sample_points_visible->points[i].g = 0;
-            sample_points_visible->points[i].b = 0;
-        }
-        else {
-            sample_points_visible->points[i].r = 0;
-            sample_points_visible->points[i].g = 255;
-            sample_points_visible->points[i].b = 0;
-        }
-    }
-    pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
-    viewer.showCloud(sample_points_visible);
-    while (!viewer.wasStopped()) {}*/
+    //// test subsample visible
+    //PointCloud::Ptr sample_points(new PointCloud);
+    //pcl::PointCloud<pcl::PointXYZRGB>::Ptr sample_points_visible(new pcl::PointCloud<pcl::PointXYZRGB>);
+    //pcl::io::loadPCDFile("../tmp/sample_points.pcd", *sample_points);
+    //int total = sample_points->size();
+    //std::vector<bool> total_flag(total, false);
+    //for (auto set : visible_result) {
+    //    for (auto ele : set) {
+    //        if (ele >= 0 && ele < total) {
+    //            total_flag[ele] = true;
+    //        }
+    //        else {
+    //            std::cerr << "Element out of range." << std::endl;
+    //            exit(-1);
+    //        }
+    //    }
+    //}
+    //sample_points_visible->resize(total);
+    //for (int i = 0; i < total; i++) {
+    //    sample_points_visible->points[i].x = sample_points->points[i].x;
+    //    sample_points_visible->points[i].y = sample_points->points[i].y;
+    //    sample_points_visible->points[i].z = sample_points->points[i].z;
+    //    if (total_flag[i]) {
+    //        sample_points_visible->points[i].r = 255;
+    //        sample_points_visible->points[i].g = 0;
+    //        sample_points_visible->points[i].b = 0;
+    //    }
+    //    else {
+    //        sample_points_visible->points[i].r = 0;
+    //        sample_points_visible->points[i].g = 255;
+    //        sample_points_visible->points[i].b = 0;
+    //    }
+    //}
+    //pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
+    //viewer.showCloud(sample_points_visible);
+    //while (!viewer.wasStopped()) {}
 
 
 
     // calculate set cover
-    ifstream poseKeypointResult;
-    std::vector<std::set<int>> visibleResult;
-    poseKeypointResult.open("pose_keypoint_200_" + std::string(argv[1]) + ".txt", ios::in);
+    ifstream in_result;
+    std::vector<std::set<int>> in_visible_result;
+    in_result.open("pose_keypoint_200_" + std::string(argv[1]) + ".txt", ios::in);
     std::string s;
-    while (getline(poseKeypointResult, s)) {
+    while (getline(in_result, s)) {
         std::set<int> set;
-        getline(poseKeypointResult, s);
+        getline(in_result, s);
         std::vector<std::string> indices;
         boost::split(indices, s, boost::is_any_of(" "));
         for (auto id : indices)
-            set.insert(atoi(id.c_str()));
-        visibleResult.push_back(set);
+            if (id.length() > 0)
+                set.insert(std::stoi(id));
+        in_visible_result.push_back(set);
     }
-    poseKeypointResult.close();
+    in_result.close();
     
-    PointCloud::Ptr sample_points(new PointCloud);
-    pcl::io::loadPCDFile("../tmp/sample_points.pcd", *sample_points);
-    std::vector<int> result = set_cover::calcSetCoverGreedy(visibleResult, sample_points->size(), 0.5, 1);
+    PointCloud::Ptr in_sample_points(new PointCloud);
+    pcl::io::loadPCDFile("../tmp/sample_points.pcd", *in_sample_points);
+    std::vector<std::pair<int, int>> result = set_cover::calcSetCoverGreedy(in_visible_result, in_sample_points->size(), 0.5, 1);
     
-    ofstream resLog;
-    resLog.open("result_" + std::string(argv[1]) + ".txt", ios::out);
-    int resLen = result.size();
-    resLog << "Total " << resLen << " poses after set cover greedy algorithm." << std::endl;
-    for (int i = 0; i < resLen; i++) {
-        resLog << "Pose Number " << result[i] << ":" << std::endl;
-        resLog << views[result[i]].matrix() << std::endl;
+    ofstream res_log;
+    res_log.open("result_" + std::string(argv[1]) + ".txt", ios::out);
+    int res_len = result.size();
+    res_log << res_len << " poses" << std::endl;
+    for (int i = 0; i < res_len; i++) {
+        res_log << result[i].first << " " << result[i].second << " :" << std::endl;
+        res_log << views[result[i].first].matrix() << std::endl;
     }
-    resLog.close();
+    res_log.close();
     std::cout << "set cover greedy completed." << std::endl;
     
 
-    // get scans from different poses
-    //ofstream transLog;
-    //transLog.open("trans_log_200.txt", ios::out);
-    //for (int i = 0; i < frames; i++) {
-    //    std::cout << "i = " << i << std::endl;
-    //    //transLog << "Transform Matrix " << i << ":" << endl;
+    //// get scans from different poses
+    //for (int r : result) {
+    //    std::cout << "View " << r << " ..." << std::flush;
     //    // getRandomTransform(0.02, 0.02, 0.02, 0.1, noise);
     //    // Eigen::Affine3d current_tf = noise * transform;
-    //    Eigen::Affine3d current_tf = views[i];
-    //    //transLog << current_tf.matrix() << endl;
-    //    Simulator.simulateMeasurement(current_tf, store_depth, store_label, store_pcd);
+    //    Eigen::Affine3d current_tf = views[r];
+    //    Simulator.simulateMeasurement(current_tf, store_depth, store_label, store_pcd, std::string(argv[1]));
+    //    std::cout << "OK" << std::endl;
     //}
-    //transLog.close();
-    
-    
-    
-    
-    
-
-    //Simulator.simulateMeasurement(current_tf, store_depth, store_label, store_pcd);
-    
+ 
     system("pause");
     return 0;
 }
