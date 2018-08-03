@@ -73,6 +73,7 @@
 #include <pcl/io/obj_io.h>
 #include <pcl/keypoints/sift_keypoint.h>
 #include <pcl/keypoints/harris_3d.h>
+#include <pcl/filters/voxel_grid.h>
 
 
 typedef CGAL::Simple_cartesian<double> K;
@@ -298,6 +299,16 @@ namespace render_kinect {
             std::cout << "OK. keypoints found: " << keypoints->points.size() << std::endl;
         }
 
+        // sample points
+        void samplePoints(PointCloud::Ptr sample_points) {
+            std::cout << "Before subsampling: " << model_->size() << " points." << std::endl;
+            /*pcl::VoxelGrid<PointT> sor;
+            sor.setInputCloud(model_);
+            sor.setLeafSize(0.02f, 0.02f, 0.02f);
+            sor.filter(*sample_points);*/
+            *sample_points = *model_;
+            std::cout << "After subsampling: " << sample_points->size() << " points." << std::endl;
+        }
     };
 }//namespace render_kinect
 

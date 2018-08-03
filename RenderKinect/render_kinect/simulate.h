@@ -90,7 +90,7 @@ namespace render_kinect {
             delete object_model_;
         }
 
-        void keypointMeasurement(const Eigen::Affine3d &new_tf) {
+        void keypointMeasurement() {
             for (int i = 0; i < 6; i++) {
                 PointCloud_I::Ptr keypoints(new PointCloud_I);
                 object_model_->calcKeypoints(keypoints, i);
@@ -108,12 +108,28 @@ namespace render_kinect {
             
         }
 
+        void subsampling() {
+            PointCloud::Ptr sample_points(new PointCloud);
+            object_model_->samplePoints(sample_points);
+            if (sample_points->size() <= 0) {
+                std::cerr << "Subsample failed." << std::endl;
+                exit(-1);
+            }
+            std::stringstream ss;
+            ss << out_path_ << "sample_points.pcd";
+            pcl::io::savePCDFileASCII(ss.str(), *sample_points);
+            
+            /*pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
+            viewer.showCloud(sample_points);
+            while (!viewer.wasStopped()) {}*/
+        }
+
         void calckeypointVisible(const Eigen::Affine3d &new_tf, std::vector<int> &visibleKeypointIndices) {
             visibleKeypointIndices.clear();
             
-            PointCloud_I::Ptr p_cloud(new PointCloud_I);
+            PointCloud::Ptr p_cloud(new PointCloud);
             std::stringstream ss;
-            ss << out_path_ << "keypoint_" << 4 << ".pcd";
+            ss << out_path_ << "sample_points.pcd";
             pcl::io::loadPCDFile(ss.str(), *p_cloud);
             int size = p_cloud->size();
 

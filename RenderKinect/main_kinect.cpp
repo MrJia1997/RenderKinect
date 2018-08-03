@@ -208,11 +208,6 @@ int main(int argc, char **argv) {
     transform.translate(Eigen::Vector3d(0, 0, 1.5));
     */
 
-
-
-    // Kinect Simulator
-    //render_kinect::Simulate Simulator(cam_info, full_path.str(), dot_path);
-
     // Number of samples
     // int frames = 20;
     int frames = views.size();
@@ -231,9 +226,11 @@ int main(int argc, char **argv) {
     transform.rotate(Eigen::Quaterniond(0.906614, -0.282680, -0.074009, -0.304411));*/
 
 
-
+    // Kinect Simulator
+    render_kinect::Simulate Simulator(cam_info, full_path.str(), dot_path);
     // calculate keypoints
-    /*Simulator.keypointMeasurement(Eigen::Affine3d::Identity());
+    //Simulator.keypointMeasurement();
+    Simulator.subsampling();
     std::vector<std::vector<int>> visibleResult;
     for (int i = 0; i < frames; i++) {
         std::cout << "i = " << i << std::endl;
@@ -255,12 +252,50 @@ int main(int argc, char **argv) {
     }
     transLog.close();
     poseKeypointResult.close();
-    std::cout << "Calculate keypoints visibility finished." << std::endl;*/
+    std::cout << "Calculate keypoints visibility finished." << std::endl;
+
+
+    // test subsample visible
+    PointCloud::Ptr sample_points(new PointCloud);
+    pcl::PointCloud<pcl::PointXYZRGB>::Ptr sample_points_visible(new pcl::PointCloud<pcl::PointXYZRGB>);
+    pcl::io::loadPCDFile("../tmp/sample_points.pcd", *sample_points);
+    int total = sample_points->size();
+    std::vector<bool> total_flag(total, false);
+    for (auto set : visibleResult) {
+        for (auto ele : set) {
+            if (ele >= 0 && ele < total) {
+                total_flag[ele] = true;
+            }
+            else {
+                std::cerr << "Element out of range." << std::endl;
+                exit(-1);
+            }
+        }
+    }
+    sample_points_visible->resize(total);
+    for (int i = 0; i < total; i++) {
+        sample_points_visible->points[i].x = sample_points->points[i].x;
+        sample_points_visible->points[i].y = sample_points->points[i].y;
+        sample_points_visible->points[i].z = sample_points->points[i].z;
+        if (total_flag[i]) {
+            sample_points_visible->points[i].r = 255;
+            sample_points_visible->points[i].g = 0;
+            sample_points_visible->points[i].b = 0;
+        }
+        else {
+            sample_points_visible->points[i].r = 0;
+            sample_points_visible->points[i].g = 255;
+            sample_points_visible->points[i].b = 0;
+        }
+    }
+    pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
+    viewer.showCloud(sample_points_visible);
+    while (!viewer.wasStopped()) {}
+
 
 
     // calculate set cover
-
-    ifstream poseKeypointResult;
+   /* ifstream poseKeypointResult;
     std::vector<std::set<int>> visibleResult;
     poseKeypointResult.open("pose_keypoint_200_" + std::string(argv[1]) + ".txt", ios::in);
     std::string s;
@@ -275,9 +310,13 @@ int main(int argc, char **argv) {
     }
     poseKeypointResult.close();
     
-    calcSetCoverGreedy(visibleResult, 573, 0.5);
+    PointCloud::Ptr sample_points(new PointCloud);
+    pcl::io::loadPCDFile("../tmp/sample_points.pcd", *sample_points);
+    std::vector<int> result = set_cover::calcSetCoverGreedy(visibleResult, sample_points->size(), 0.5, 1);
     
-    int a = 0;
+    */
+
+
     // get scans from different poses
     //ofstream transLog;
     //transLog.open("trans_log_200.txt", ios::out);

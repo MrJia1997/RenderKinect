@@ -111,6 +111,10 @@ namespace render_kinect {
             model_->calcKeypoints(keypoints, type);
         }
 
+        void samplePoints(PointCloud::Ptr sample_points) {
+            model_->samplePoints(sample_points);
+        }
+
         // test visible
         void testVisible(const Eigen::Affine3d &p_tf, 
             const Eigen::MatrixXd &keypoints, 

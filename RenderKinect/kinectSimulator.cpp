@@ -185,7 +185,7 @@ namespace render_kinect {
                 (A.z() - B.z()) * (A.z() - B.z()));
         };
         
-        std::cout << p_tf.matrix() << std::endl;
+        //std::cout << p_tf.matrix() << std::endl;
         Eigen::MatrixXd trans_keypoints = p_tf.matrix() * keypoints;
         int len = trans_keypoints.cols();
         for (int i = 0; i < len; i++) {
