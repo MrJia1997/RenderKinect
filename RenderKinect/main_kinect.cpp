@@ -226,37 +226,37 @@ int main(int argc, char **argv) {
     transform.rotate(Eigen::Quaterniond(0.906614, -0.282680, -0.074009, -0.304411));*/
 
 
-    // Kinect Simulator
-    render_kinect::Simulate Simulator(cam_info, full_path.str(), dot_path);
-    // calculate keypoints
-    //Simulator.keypointMeasurement();
-    Simulator.subsampling();
-    std::vector<std::vector<int>> visibleResult;
-    for (int i = 0; i < frames; i++) {
-        std::cout << "i = " << i << std::endl;
-        Eigen::Affine3d current_tf = views[i];
-        std::vector<int> visibleKeypointIndices;
-        Simulator.calckeypointVisible(current_tf, visibleKeypointIndices);
-        visibleResult.push_back(visibleKeypointIndices);
-    }
-    ofstream transLog, poseKeypointResult;
-    transLog.open("trans_log_200.txt", ios::out);
-    poseKeypointResult.open("pose_keypoint_200_" + std::string(argv[1]) + ".txt", ios::out);
-    for (int i = 0; i < frames; i++) {
-        transLog << "Pose Transform Matrix " << i << ":" << std::endl;
-        transLog << views[i].matrix() << std::endl;
-        poseKeypointResult << "Pose Visible Keypoints Indices " << i << ":" << std::endl;
-        for (int id : visibleResult[i])
-            poseKeypointResult << id << " ";
-        poseKeypointResult << std::endl;
-    }
-    transLog.close();
-    poseKeypointResult.close();
-    std::cout << "Calculate keypoints visibility finished." << std::endl;
+    //// Kinect Simulator
+    //render_kinect::Simulate Simulator(cam_info, full_path.str(), dot_path);
+    //// calculate keypoints
+    ////Simulator.keypointMeasurement();
+    //Simulator.subsampling();
+    //std::vector<std::vector<int>> visibleResult;
+    //for (int i = 0; i < frames; i++) {
+    //    std::cout << "i = " << i << std::endl;
+    //    Eigen::Affine3d current_tf = views[i];
+    //    std::vector<int> visibleKeypointIndices;
+    //    Simulator.calckeypointVisible(current_tf, visibleKeypointIndices);
+    //    visibleResult.push_back(visibleKeypointIndices);
+    //}
+    //ofstream transLog, poseKeypointResult;
+    //transLog.open("trans_log_200.txt", ios::out);
+    //poseKeypointResult.open("pose_keypoint_200_" + std::string(argv[1]) + ".txt", ios::out);
+    //for (int i = 0; i < frames; i++) {
+    //    transLog << "Pose Transform Matrix " << i << ":" << std::endl;
+    //    transLog << views[i].matrix() << std::endl;
+    //    poseKeypointResult << "Pose Visible Keypoints Indices " << i << ":" << std::endl;
+    //    for (int id : visibleResult[i])
+    //        poseKeypointResult << id << " ";
+    //    poseKeypointResult << std::endl;
+    //}
+    //transLog.close();
+    //poseKeypointResult.close();
+    //std::cout << "Calculate keypoints visibility finished." << std::endl;
 
 
     // test subsample visible
-    PointCloud::Ptr sample_points(new PointCloud);
+    /*PointCloud::Ptr sample_points(new PointCloud);
     pcl::PointCloud<pcl::PointXYZRGB>::Ptr sample_points_visible(new pcl::PointCloud<pcl::PointXYZRGB>);
     pcl::io::loadPCDFile("../tmp/sample_points.pcd", *sample_points);
     int total = sample_points->size();
@@ -290,12 +290,12 @@ int main(int argc, char **argv) {
     }
     pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
     viewer.showCloud(sample_points_visible);
-    while (!viewer.wasStopped()) {}
+    while (!viewer.wasStopped()) {}*/
 
 
 
     // calculate set cover
-   /* ifstream poseKeypointResult;
+    ifstream poseKeypointResult;
     std::vector<std::set<int>> visibleResult;
     poseKeypointResult.open("pose_keypoint_200_" + std::string(argv[1]) + ".txt", ios::in);
     std::string s;
@@ -314,8 +314,17 @@ int main(int argc, char **argv) {
     pcl::io::loadPCDFile("../tmp/sample_points.pcd", *sample_points);
     std::vector<int> result = set_cover::calcSetCoverGreedy(visibleResult, sample_points->size(), 0.5, 1);
     
-    */
-
+    ofstream resLog;
+    resLog.open("result_" + std::string(argv[1]) + ".txt", ios::out);
+    int resLen = result.size();
+    resLog << "Total " << resLen << " poses after set cover greedy algorithm." << std::endl;
+    for (int i = 0; i < resLen; i++) {
+        resLog << "Pose Number " << result[i] << ":" << std::endl;
+        resLog << views[result[i]].matrix() << std::endl;
+    }
+    resLog.close();
+    std::cout << "set cover greedy completed." << std::endl;
+    
 
     // get scans from different poses
     //ofstream transLog;

@@ -301,12 +301,22 @@ namespace render_kinect {
 
         // sample points
         void samplePoints(PointCloud::Ptr sample_points) {
-            std::cout << "Before subsampling: " << model_->size() << " points." << std::endl;
-            /*pcl::VoxelGrid<PointT> sor;
-            sor.setInputCloud(model_);
-            sor.setLeafSize(0.02f, 0.02f, 0.02f);
-            sor.filter(*sample_points);*/
-            *sample_points = *model_;
+            int sample_size = 5000;
+
+            int original_size = model_->size();
+            std::cout << "Before subsampling: " << original_size << " points." << std::endl;
+            if (original_size <= sample_size) {
+                *sample_points = *model_;
+            }
+            else {
+                int sub_ratio = original_size / sample_size + 1;
+                for (int i = 0; i < original_size; i++) {
+                    if (i % sub_ratio == 0) {
+                        sample_points->push_back(model_->points[i]);
+                    }
+                }
+            }
+            
             std::cout << "After subsampling: " << sample_points->size() << " points." << std::endl;
         }
     };
