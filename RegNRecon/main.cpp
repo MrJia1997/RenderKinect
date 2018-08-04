@@ -23,6 +23,7 @@
 #include <pcl/registration/icp_nl.h>
 #include <pcl/registration/transforms.h>
 #include <pcl/visualization/pcl_visualizer.h>
+#include <pcl/filters/voxel_grid.h>
 using pcl::visualization::PointCloudColorHandlerGenericField;
 using pcl::visualization::PointCloudColorHandlerCustom;
 // Eigen
@@ -55,9 +56,9 @@ void insertBeeModels(std::vector<std::string> &fileNames) {
 
 void insertBunnyModels(std::vector<std::string> &fileNames) {
     fileNames.clear();
-    for (int i = 1; i <= 10; i++) {
+    for (int i = 1; i <= 11; i++) {
         std::stringstream s;
-        s << "bunny" << std::setw(2) << std::setfill('0') << i << ".obj";
+        s << "point_cloudbunny_34k.obj_" << std::setw(3) << std::setfill('0') << i << ".pcd"; 
         fileNames.push_back(s.str());
     }
 }
@@ -146,7 +147,46 @@ void importPointsFromOBJ(std::vector<pclPointCloud::Ptr> &models, const std::str
     return;
 }
 
+void readBunnyInfo(
+    std::vector<int> &ids,
+    std::vector<Eigen::Matrix4f> &tfs,
+    std::vector<std::pair<int, int>> &seq) {
+    
+    ifstream info;
+    info.open("result_bunny_34k.obj.txt", ios::in);
+    int size;
+    string str;
+    info >> size >> str;
+    for (int i = 0; i < size; i++) {
+        Eigen::Matrix4f tf;
+        int id1, id2;
+        info >> id1 >> id2 >> str;
+        ids.push_back(id1);
+        for (int c = 0; c < 4; c++) {
+            for (int r = 0; r < 4; r++) {
+                info >> tf(c, r);
+            }
+        }
+        tfs.push_back(tf);
+        // first scan
+        if (id2 == -1)
+            continue;
+        // following scans
+        int cur_id_size = ids.size();
+        for (int j = 0; j < cur_id_size; j++) {
+            if (ids[j] == id1)
+                id1 = j;
+            if (ids[j] == id2)
+                id2 = j;
+        }
+        seq.push_back(std::make_pair(id2, id1));
+    }
 
+    info.close();
+    cout << "Read info finished" << endl;
+}
+
+// Align target to source
 void pairAlign(const pclPointCloud::Ptr cloud_src, const pclPointCloud::Ptr cloud_tgt,
     pclPointCloud::Ptr output, Eigen::Matrix4f &final_transform)
 {
@@ -210,7 +250,7 @@ void pairAlign(const pclPointCloud::Ptr cloud_src, const pclPointCloud::Ptr clou
     // Get the transformation from target to source
     targetToSource = Ti.inverse();
 
-    std::cout << targetToSource << std::endl;
+    //std::cout << targetToSource << std::endl;
     //
     // Transform target back in source frame
     pcl::transformPointCloud(*cloud_tgt, *output, targetToSource);
@@ -346,62 +386,59 @@ void registrationGoICP(std::vector<pclPointCloud::Ptr> &models, std::string &con
 
 }
 
-void registration(std::vector<pclPointCloud::Ptr> &models, std::vector<Eigen::Matrix4f> &transformations) {
+void registration(std::vector<pclPointCloud::Ptr> &models, 
+    std::vector<Eigen::Matrix4f> &transformations,
+    std::vector<std::pair<int, int>> &reg_seq) {
+    
     int len = models.size();
-    Eigen::Matrix4f GlobalTransform = Eigen::Matrix4f::Identity(), pairTransform;
-    pclPointCloud::Ptr result(new pclPointCloud), tempTar(new pclPointCloud);
+    std::vector<Eigen::Matrix4f> global_transform(models.size(), Eigen::Matrix4f::Identity());
+    
+    pclPointCloud::Ptr result(new pclPointCloud);
+    
+    // add first scan
+    *result += *models[0];
+    
+    for (auto pair : reg_seq) {
+        int src_id = pair.first, tgt_id = pair.second;
+       
+        // initial alignment
+        Eigen::Matrix4f init_align = transformations[src_id] * transformations[tgt_id].inverse();
+        pclPointCloud::Ptr temp_tgt(new pclPointCloud), reg_res(new pclPointCloud);
+        pcl::transformPointCloud(*models[tgt_id], *temp_tgt, init_align);
 
-    //for (int i = 0; i < len - 1; i++) {
+        // registration
+        Eigen::Matrix4f pair_transform = Eigen::Matrix4f::Identity();
+        pairAlign(models[src_id], temp_tgt, reg_res, pair_transform);
+        //pcl::transformPointCloud(*temp_tgt, *reg_res, pair_transform);
+        
+        if (src_id == 0) {
+            global_transform[tgt_id] = pair_transform * init_align;
+            *result += *reg_res;
+        }
+        else {
+            pclPointCloud::Ptr source_res(new pclPointCloud);
+            pcl::transformPointCloud(*reg_res, *source_res, global_transform[src_id]);
+            global_transform[tgt_id] = global_transform[src_id] * pair_transform * init_align;
+            *result += *source_res;
+        }
+        
+        cout << "Register " << src_id << " and " << tgt_id << std::endl;
+        cout << pair_transform.matrix() << std::endl;
+    }
 
-    //    pclPointCloud::Ptr temp(new pclPointCloud);
-    //    pairAlign(models[i], models[i + 1], temp, pairTransform);
+    // restore first pose
+    pclPointCloud::Ptr result_restored(new pclPointCloud);
+    pcl::transformPointCloud(*result, *result_restored, transformations[0].inverse());
 
-    //    //transform current pair into the global transform
-    //    pcl::transformPointCloud(*temp, *result, GlobalTransform);
-
-    //    //update the global transform
-    //    GlobalTransform = GlobalTransform * pairTransform;
-    //    
-
-    //    std::cout << "Result size: " << result->size() << std::endl;
-    //    std::stringstream ss;
-    //    ss << "../tmp/" << i << ".pcd";
-    //    pcl::io::savePCDFile(ss.str(), *result, true);
-
-    //    pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
-    //    pcl::PointCloud<pcl::PointXYZ>::Ptr p_cloud(new pcl::PointCloud<pcl::PointXYZ>);
-    //    pcl::io::loadPCDFile(ss.str(), *p_cloud);
-    //    viewer.showCloud(p_cloud);
-
-    //    while (!viewer.wasStopped()) {}
-    //}
-
-    //*result = *models[0];
-    /*for (int i = 1; i < len; i++) {
-        GlobalTransform = transformations[0] * transformations[i].inverse();
-        pcl::transformPointCloud(*models[i], *tempTar, GlobalTransform);
-        *result += *tempTar;
-    }*/
-
-
-    *result = *models[modelPair];
-    //GlobalTransform = transformations[modelPair] * transformations[modelPair + 1].inverse();
-    //pcl::transformPointCloud(*models[modelPair + 1], *tempTar, GlobalTransform);
-    //pairAlign(models[modelPair], tempTar, result, pairTransform);
-    pairAlign(models[modelPair], models[modelPair + 1], result, pairTransform);
-
-    //transform current pair into the global transform
-
-    std::cout << "Result size: " << result->size() << std::endl;
-    std::stringstream ss;
-    ss << "../tmp/" << modelPair << ".pcd";
-    pcl::io::savePCDFile(ss.str(), *result, true);
+    // downsampling
+    pclPointCloud::Ptr result_downsampled(new pclPointCloud);
+    pcl::VoxelGrid<PointT> sor;
+    sor.setInputCloud(result_restored);
+    sor.setLeafSize(0.005f, 0.005f, 0.005f);
+    sor.filter(*result_downsampled);
 
     pcl::visualization::CloudViewer viewer("Simple Cloud Viewer");
-    pclPointCloud::Ptr p_cloud(new pclPointCloud);
-    pcl::io::loadPCDFile(ss.str(), *p_cloud);
-    viewer.showCloud(p_cloud);
-
+    viewer.showCloud(result_downsampled);
     while (!viewer.wasStopped()) {}
 
 }
@@ -414,29 +451,21 @@ int main(int argc, char **argv) {
     std::vector<pclPointCloud::Ptr> models;
     std::string filePath = "../obj_models/multi/";
     std::vector<std::string> fileNames;
-    std::vector<Eigen::Matrix4f> transformations;
     
     int dataDownsampled = 2000;
     std::string configName = "config.txt";
 
-    //cout << "Max correlation: ";
-    //cin >> maxCorr;
-    //cout << "Max iteration: ";
-    //cin >> maxIter;
-    //cout << "Iteration times: ";
-    //cin >> iterTimes;
     //cout << "Config file name: ";
     //cin >> configName;
-    cout << "Data downsampled: ";
-    cin >> dataDownsampled;
-    cout << "Model pair: ";
-    cin >> modelPair;
+    /*cout << "Data downsampled: ";
+    cin >> dataDownsampled;*/
+    /*cout << "Model pair: ";
+    cin >> modelPair;*/
 
-    fileNames.push_back("../../tmp/point_cloud001.pcd");
-    fileNames.push_back("../../tmp/point_cloud001.pcd");
     //insertBeeModels(fileNames);
-    //insertBunnyModels(fileNames);
+    insertBunnyModels(fileNames);
     //insertDiceModels(fileNames, transformations);
+
     
     // import models
     for (auto s : fileNames) {
@@ -452,8 +481,14 @@ int main(int argc, char **argv) {
         }
     }
     
+    // read scan information
+    std::vector<Eigen::Matrix4f> transformations;
+    std::vector<int> scan_indices;
+    std::vector<std::pair<int, int>> reg_sequence;
+    readBunnyInfo(scan_indices, transformations, reg_sequence);
+
     // registration
-    registration(models, transformations);
+    registration(models, transformations, reg_sequence);
     //registrationGoICP(models, configName, dataDownsampled);
 
     // reconstruction
